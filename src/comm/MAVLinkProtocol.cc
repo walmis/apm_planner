@@ -118,6 +118,8 @@ void MAVLinkProtocol::receiveBytes(LinkInterface* link, QByteArray b)
                     sendMessage(msg);
                 }
             }
+            
+            qDebug() << "MSG RECV: " << message.msgid;
 
 #if defined(QGC_PROTOBUF_ENABLED)
 
