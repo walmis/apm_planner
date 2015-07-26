@@ -283,7 +283,12 @@ QMap<quint64,QString> AP2DataPlot2DModel::getModeValues()
     while (modequery.next())
     {
         QSqlRecord record = modequery.record();
+	
         quint64 index = record.value(0).toLongLong();
+	if (record.contains("TimeUS")) {
+	  index = record.value("TimeUS").toLongLong();
+	}
+	
         QString mode = "";
         if (record.contains("Mode"))
         {
@@ -534,6 +539,14 @@ bool AP2DataPlot2DModel::addType(QString name,int type,int length,QString types,
 QMap<quint64,QVariant> AP2DataPlot2DModel::getValues(const QString& parent,const QString& child)
 {
     int index = getChildIndex(parent,child);
+    int time_index = getChildIndex(parent,"TimeUS");
+    if(time_index == -1) {
+      qDebug() << "timeUS not found" << endl;
+      time_index = 0; //use row index if time is unavailable
+    } else {
+      time_index+=1;
+    }
+
     QSqlQuery itemquery(m_sharedDb);
     itemquery.prepare("SELECT * FROM '" + parent + "';");
     itemquery.exec();
@@ -541,7 +554,7 @@ QMap<quint64,QVariant> AP2DataPlot2DModel::getValues(const QString& parent,const
     while (itemquery.next())
     {
         QSqlRecord record = itemquery.record();
-        quint64 graphindex = record.value(0).toLongLong();
+	quint64 graphindex = record.value(time_index).toLongLong();
         QVariant graphvalue= record.value(index+1);
         retval.insert(graphindex,graphvalue);
     }
@@ -691,6 +704,10 @@ QString AP2DataPlot2DModel::makeCreateTableString(QString tablename, QString for
         {
             mktable.append("," + name + " real");
         }
+        else if (typeCode == 'd') //double
+	{
+	  mktable.append("," + name + " real");
+	}
         else if (typeCode == 'N') //char(16)
         {
             mktable.append("," + name + " text");

@@ -347,7 +347,8 @@ void AP2DataPlot2D::plotMouseMove(QMouseEvent *evt)
         {
             if (m_logLoaded)
             {
-                newresult.append("Log Line: " + QString::number(key,'f',0) + "\n");
+		QString str;
+		newresult.append("Time: " + str.sprintf("%.0fs %.3fms", round(key/1000000.0), key/1000) + "\n");
             }
             else
             {
@@ -908,6 +909,7 @@ void AP2DataPlot2D::itemEnabled(QString name)
         QVector<double> xlist;
         QVector<double> ylist;
         QMap<quint64,QVariant> values = m_tableModel->getValues(parent,child);
+	qDebug() << parent << " " << child << endl;
         if (values.size() == 0)
         {
             //No values!
